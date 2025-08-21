@@ -1,11 +1,10 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using KayraExport.Application.Interfaces;
 using KayraExport.Domain.DTOs;
 using KayraExport.Domain.Entities;
+using KayraExport.Domain.Exceptions;
 using KayraExport.Domain.Interfaces;
 
 namespace KayraExport.Application.Services
@@ -20,6 +19,7 @@ namespace KayraExport.Application.Services
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
+
         public async Task AddProductAsync(CreateProductDto productDto)
         {
             var product = _mapper.Map<Product>(productDto);
@@ -31,8 +31,8 @@ namespace KayraExport.Application.Services
         {
             var product = await _unitOfWork.ProductRepository.GetByIdAsync(id);
 
-            if (product is null)
-                throw new KeyNotFoundException($"Product with Id {id} not found"); // ----------------------------------------------------------An exception will be added here.
+            if (product == null)
+                throw new NotFoundException($"Product with Id {id} not found");
 
             _unitOfWork.ProductRepository.Delete(product);
             await _unitOfWork.SaveChangesAsync();
@@ -47,18 +47,21 @@ namespace KayraExport.Application.Services
         public async Task<ProductDto?> GetProductByIdAsync(int id)
         {
             var product = await _unitOfWork.ProductRepository.GetByIdAsync(id);
-            return _mapper.Map<ProductDto?>(product);
+
+            if (product == null)
+                throw new NotFoundException($"Product with Id {id} not found");
+
+            return _mapper.Map<ProductDto>(product);
         }
 
         public async Task UpdateProductAsync(int id, UpdateProductDto productDto)
         {
             var product = await _unitOfWork.ProductRepository.GetByIdAsync(id);
 
-            if (product is null)
-                throw new KeyNotFoundException($"Product with Id {id} not found"); // ----------------------------------------------------------An exception will be added here.
+            if (product == null)
+                throw new NotFoundException($"Product with Id {id} not found");
 
             _mapper.Map(productDto, product);
-
             await _unitOfWork.SaveChangesAsync();
         }
     }

@@ -1,11 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using KayraExport.Application.Interfaces;
 using KayraExport.Domain.DTOs;
 using KayraExport.Domain.Entities;
+using KayraExport.Domain.Exceptions;
 using KayraExport.Domain.Interfaces;
 
 namespace KayraExport.Application.Services
@@ -20,6 +18,7 @@ namespace KayraExport.Application.Services
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
+
         public async Task AddUserAsync(RegisterUserDto registerUserDto)
         {
             var user = _mapper.Map<User>(registerUserDto);
@@ -33,11 +32,10 @@ namespace KayraExport.Application.Services
             var user = await _unitOfWork.UserRepository.GetByIdAsync(id);
 
             if (user is null)
-                throw new KeyNotFoundException($"User with Id {id} not found"); // ----------------------------------------------------------An exception will be added here.
-            
+                throw new NotFoundException($"User with Id {id} not found");
+
             _unitOfWork.UserRepository.Delete(user);
             await _unitOfWork.SaveChangesAsync();
-            
         }
 
         public async Task<User?> GetUserByEmailAsync(string email)
@@ -45,7 +43,7 @@ namespace KayraExport.Application.Services
             var user = await _unitOfWork.UserRepository.GetByEmailAsync(email);
 
             if (user is null)
-                throw new KeyNotFoundException($"User with Email: {email} not found"); // ----------------------------------------------------------An exception will be added here.
+                throw new NotFoundException($"User with Email: {email} not found");
 
             return user;
         }
@@ -55,7 +53,7 @@ namespace KayraExport.Application.Services
             var user = await _unitOfWork.UserRepository.GetByIdAsync(id);
 
             if (user is null)
-                throw new KeyNotFoundException($"User with Id {id} not found"); // ----------------------------------------------------------An exception will be added here.
+                throw new NotFoundException($"User with Id {id} not found");
 
             return _mapper.Map<UserDto>(user);
         }

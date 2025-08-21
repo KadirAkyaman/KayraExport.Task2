@@ -4,11 +4,14 @@ using KayraExport.Application.Services;
 using KayraExport.Domain.Interfaces;
 using KayraExport.Infrastructure.Persistence;
 using KayraExport.Infrastructure.Persistence.UnitOfWork;
+using KayraExport.Infrastructure.Middleware;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,14 +55,31 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// Controllers
-builder.Services.AddControllers();
+// API Versioning
+builder.Services.AddApiVersioning(options =>
+{
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.ReportApiVersions = true;
+    options.ApiVersionReader = new UrlSegmentApiVersionReader(); // e.g., /api/v1/products
+});
+
+// Controllers + FluentValidation
+builder.Services.AddControllers()
+    .AddFluentValidation(fv =>
+    {
+        fv.RegisterValidatorsFromAssemblyContaining<Program>();
+        fv.AutomaticValidationEnabled = true;
+    });
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+// Global Exception Middleware
+app.UseMiddleware<ExceptionMiddleware>();
 
 // Configure middleware
 if (app.Environment.IsDevelopment())
