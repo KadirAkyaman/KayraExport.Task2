@@ -18,7 +18,9 @@ namespace KayraExport.Infrastructure.Persistence.Configurations
             builder.Property(u => u.Email)
                 .IsRequired()
                 .HasMaxLength(60);
-                
+
+            builder.HasIndex(u => u.Email).IsUnique();
+
             builder.Property(u => u.PasswordHash)
                 .IsRequired();
         }
