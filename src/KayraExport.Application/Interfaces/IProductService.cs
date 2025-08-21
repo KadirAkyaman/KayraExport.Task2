@@ -7,7 +7,7 @@ namespace KayraExport.Application.Interfaces
         Task<IEnumerable<ProductDto>> GetAllProductsAsync();
         Task<ProductDto?> GetProductByIdAsync(int id);
         Task AddProductAsync(CreateProductDto productDto);
-        Task UpdateProductAsync(UpdateProductDto productDto);
+        Task UpdateProductAsync(int id, UpdateProductDto productDto);
         Task DeleteProductAsync(int id);
     }
 }

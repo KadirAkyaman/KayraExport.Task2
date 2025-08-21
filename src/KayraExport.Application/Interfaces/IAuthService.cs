@@ -8,6 +8,6 @@ namespace KayraExport.Application.Interfaces
 {
     public interface IAuthService
     {
-        Task<string?> LoginUserAsync(LoginUserDto loginUserDto);
+        Task<AuthResponseDto?> LoginUserAsync(LoginUserDto loginUserDto);
     }
 }
